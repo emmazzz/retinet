@@ -8,15 +8,18 @@ typedef struct Network Network;
 
 struct Node {
 	double output;
-	double weights[];
+	double bias;
 	int weight_count;
+	int size;
+	double weights[];
 };
 
 struct Layer {
 	LayerType layer_type;
 	AcFunType acfun_type;
-	Node nodes[];
 	int node_count;
+	int size;
+	Node nodes[];
 
 };
 
@@ -27,6 +30,7 @@ struct Vector {
 
 struct Network {
 	double learning_rate;
+	int layer_count;
 	Layer layers[];
 };
 
@@ -34,4 +38,3 @@ struct Network {
 void feedInput(Network *nn, Vector *v);
 void feedForwardNetwork(Network *nn);
 void backPropagateNetwork(Network *nn, int targetClassification);
-
