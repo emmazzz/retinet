@@ -124,7 +124,8 @@ void printNetwork(Network *nn) {
 	printf("Number of nodes: %d\n", hiddenLayer->node_count);
 	curNode = hiddenLayer->nodes;
 	for (int i = 0;i < hiddenLayer->node_count;i++) {
-		printf("Node %d output is: %f\n", i, curNode->output);
+		printf("Node %d output is: %f  error is: %f\n", 
+			i, curNode->output,curNode->error);
 		printf("weights are\n");
 		for (int j = 0;j < curNode->weight_count;j++) {
 			printf("   %f\n", curNode->weights[j]);
@@ -138,7 +139,8 @@ void printNetwork(Network *nn) {
 	printf("Number of nodes: %d\n", outputLayer->node_count);
 	curNode = outputLayer->nodes;
 	for (int i = 0;i < outputLayer->node_count;i++) {
-		printf("Node %d output is: %f\n", i, curNode->output);
+		printf("Node %d output is: %f  error is: %f\n", 
+			i, curNode->output,curNode->error);
 		printf("weights are\n");
 		for (int j = 0;j < curNode->weight_count;j++) {
 			printf("   %f\n", curNode->weights[j]);
@@ -156,8 +158,13 @@ int main() {
 	inputs->vals[1] = 2;
 	feedInput(nn,inputs);
 	initWeights(nn);
-	printNetwork(nn);
 	forwardPropagate(nn,1);
+	Vector *expected = malloc(sizeof(Vector) + sizeof(double)*3);
+	expected->size = 3;
+	expected->vals[0] = 1;
+	expected->vals[1] = 0;
+	expected->vals[2] = 0;
+	backwardPropagate(nn,expected);
 	printNetwork(nn);
 	free(nn);
 	return 1;

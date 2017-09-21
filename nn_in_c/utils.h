@@ -9,6 +9,7 @@ typedef struct Network Network;
 struct Node {
 	double output;
 	double bias;
+	double error;
 	int weight_count;
 	int size;
 	double weights[];
@@ -37,4 +38,4 @@ struct Network {
 
 void feedInput(Network *nn, Vector *v);
 void forwardPropagate(Network *nn, double bias);
-void backPropagateNetwork(Network *nn, int targetClassification);
+void backwardPropagate(Network *nn, Vector *expected);
