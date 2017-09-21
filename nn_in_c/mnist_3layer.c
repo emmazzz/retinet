@@ -125,7 +125,7 @@ void printNetwork(Network *nn) {
 	curNode = hiddenLayer->nodes;
 	for (int i = 0;i < hiddenLayer->node_count;i++) {
 		printf("Node %d output is: %f\n", i, curNode->output);
-		printf("weights are");
+		printf("weights are\n");
 		for (int j = 0;j < curNode->weight_count;j++) {
 			printf("   %f\n", curNode->weights[j]);
 		}
@@ -139,7 +139,7 @@ void printNetwork(Network *nn) {
 	curNode = outputLayer->nodes;
 	for (int i = 0;i < outputLayer->node_count;i++) {
 		printf("Node %d output is: %f\n", i, curNode->output);
-		printf("weights are");
+		printf("weights are\n");
 		for (int j = 0;j < curNode->weight_count;j++) {
 			printf("   %f\n", curNode->weights[j]);
 		}
@@ -156,6 +156,8 @@ int main() {
 	inputs->vals[1] = 2;
 	feedInput(nn,inputs);
 	initWeights(nn);
+	printNetwork(nn);
+	forwardPropagate(nn,1);
 	printNetwork(nn);
 	free(nn);
 	return 1;
