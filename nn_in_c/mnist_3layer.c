@@ -86,20 +86,26 @@ void initWeights(Network *nn) {
 	uint8_t *layer = (uint8_t *)nn->layers + nn->layers->size;
 	int node_count = ((Layer *)layer)->node_count;
 	uint8_t *ptr = (uint8_t *)(((Layer *)layer)->nodes);
-	printf("weights\n");
 	for (int j = 0;j < node_count;j++) {
-		printf("weight j: %d\n", j);
 		Node *node = (Node *)ptr;
 		for (int i = 0;i < node->weight_count;i++) {
-			printf("aa\n");
 			node->weights[i] = 0.7*(rand()/(double)(RAND_MAX));
-			printf("bb\n");
 			if (i%2) node->weights[i] = -1*node->weights[i];
 		}
 		ptr += node->size;
 	}
 
 	layer += ((Layer *)layer)->size;
+	node_count = ((Layer *)layer)->node_count;
+	ptr = (uint8_t *)(((Layer *)layer)->nodes);
+	for (int j = 0;j < node_count;j++) {
+		Node *node = (Node *)ptr;
+		for (int i = 0;i < node->weight_count;i++) {
+			node->weights[i] = 0.7*(rand()/(double)(RAND_MAX));
+			if (i%2) node->weights[i] = -1*node->weights[i];
+		}
+		ptr += node->size;
+	}
 
 }
 
@@ -117,8 +123,21 @@ void printNetwork(Network *nn) {
 	printf("==== Hidden Layer ====\n");
 	printf("Number of nodes: %d\n", hiddenLayer->node_count);
 	curNode = hiddenLayer->nodes;
-	printf("yo\n");
 	for (int i = 0;i < hiddenLayer->node_count;i++) {
+		printf("Node %d output is: %f\n", i, curNode->output);
+		printf("weights are");
+		for (int j = 0;j < curNode->weight_count;j++) {
+			printf("   %f\n", curNode->weights[j]);
+		}
+		printf("\n");
+		curNode = (Node *)((uint8_t *)curNode + curNode->size);
+	}
+
+	Layer *outputLayer = (Layer *)((uint8_t *)hiddenLayer + hiddenLayer->size);
+	printf("==== Output Layer ====\n");
+	printf("Number of nodes: %d\n", outputLayer->node_count);
+	curNode = outputLayer->nodes;
+	for (int i = 0;i < outputLayer->node_count;i++) {
 		printf("Node %d output is: %f\n", i, curNode->output);
 		printf("weights are");
 		for (int j = 0;j < curNode->weight_count;j++) {
@@ -130,7 +149,6 @@ void printNetwork(Network *nn) {
 }
 
 int main() {
-	printf("yoyo\n");
 	Network *nn = createNeuralNetwork(2,3,4);
 	Vector *inputs = malloc(sizeof(Vector) + sizeof(double)*2);
 	inputs->size = 2;
@@ -139,8 +157,7 @@ int main() {
 	feedInput(nn,inputs);
 	initWeights(nn);
 	printNetwork(nn);
-	printf("freee???\n");
-	// free(nn);
+	free(nn);
 	return 1;
 	
 }
