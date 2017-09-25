@@ -37,5 +37,6 @@ struct Network {
 
 
 void feedInput(Network *nn, Vector *v);
-void forwardPropagate(Network *nn, double bias);
+void forwardPropagate(Network *nn);
 void backwardPropagate(Network *nn, Vector *expected);
+void updateWeights(Network *nn);
