@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils.h"
 #include <math.h>
-#include <stdint.h>
-#include <string.h>
 #include <assert.h>
-
+#include "read.h"
 
 // label magic number 
 #define LABEL_MAGIC 0x00000801
@@ -24,7 +21,8 @@ static struct
    uint32_t image_cols;
 
    // bookkeeping
-   uint32_t cur_index;
+   uint32_t image_index;
+   uint32_t label_index;
 
    Vector *cur_image;
    int cur_label;   
@@ -56,9 +54,6 @@ int load_minist_init()
       exit(EXIT_FAILURE);
    }
    
-   // while( ( ch = fgetc(fp) ) != EOF )
-   //    printf("%x \n",ch); 
-
    // check magic number
    uint32_t label_magic_read;
    uint32_t image_magic_read;
@@ -87,7 +82,8 @@ int load_minist_init()
    printf("%d read col \n", data.image_cols);
 
    // init other data
-   data.cur_index = 0;
+   data.image_index = 0;
+   data.label_index = 0;
 
    Vector *inputs = malloc(sizeof(Vector) + sizeof(double)*2);
    inputs->size = 2;
@@ -100,98 +96,51 @@ int load_minist_init()
    data.cur_label = -1; // no data yet  
 
 
-   // printf("\n");
-   // printf("%x \n", fgetc(data.label_file));
-   // printf("%x \n", fgetc(data.label_file));
-   // printf("%x \n", fgetc(data.label_file));
-   // printf("%x \n", fgetc(data.label_file));
-   // printf("%x \n", fgetc(data.label_file));
-   // printf("%x \n", fgetc(data.label_file));
-   // printf("\n");
-   // printf("%x \n", fgetc(data.image_file));
-   // printf("%x \n", fgetc(data.image_file));
-   // printf("%x \n", fgetc(data.image_file));
-   // printf("%x \n", fgetc(data.image_file));
-   // printf("%x \n", fgetc(data.image_file));
-   // printf("%x \n", fgetc(data.image_file));
-
-
-   // fclose(data.label_file);
-   // fclose(data.image_file);
+  
    return 1;
 }
 
+void free_mninst()
+{
+   free(data.cur_image);
+   fclose(data.label_file);
+   fclose(data.image_file);
+}
 
-Vector *getNextImage();
-int getNextLabel();
+Vector *getNextImage()
+{
+   for (int i = 0; i < data.image_rows * data.image_cols; ++i)
+   {
+      data.cur_image->vals[i] = (double) fgetc(data.image_file);
+   }
+   data.image_index++;
+   return data.cur_image;
+}
 
-
+int getNextLabel(){
+   data.cur_label = (int) fgetc(data.label_file);
+   return data.cur_label;
+}
 
 int main()
 {
+   // init
    load_minist_init();
+
+   // call api
+   Vector *inputs = getNextImage();
+   int label = getNextLabel();
+   
+   // check output
+   // printf("%d\n", label);
+   // for (int i = 0; i < 784; ++i)
+   // {
+   //    label = inputs->vals[i];
+   //    printf("%d\n", label);
+   // }
+
+   // free data
+   free_mninst();
    return 0;
 }
 
-
-// Vector *read_mnist_label()
-// {
-//    char ch;
-//    FILE *fp;
-//    char *file_name = "mnist_data/testing";
-//    fp = fopen(file_name,"r"); // read mode
- 
-//    if( fp == NULL )
-//    {
-//       perror("Error while opening the file.\n");
-//       exit(EXIT_FAILURE);
-//    }
- 
-//    printf("The contents of %s file are :\n", file_name);
-   
-//    while( ( ch = fgetc(fp) ) != EOF )
-//       printf("%x ",ch);
- 
-//    fclose(fp);
-//    return 0;
-// }
-
-
-
-    
-
-// Vector *readfile()
-// {
-//    FILE *fileptr;
-//    char *buffer;
-//    long filelen;
-
-//    fileptr = fopen("mnist_data/testing", "rb");  // Open the file in binary mode
-//    fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
-//    filelen = ftell(fileptr);             // Get the current byte offset in the file
-//    rewind(fileptr);                      // Jump back to the beginning of the file
-
-//    buffer = (char *)malloc((filelen+1)*sizeof(char)); // Enough memory for file + \0
-//    fread(buffer, filelen, 1, fileptr); // Read in the entire file
-//    fclose(fileptr); // Close the file
-
-//    uint32_t magic = endian_swap(*(uint32_t *)(buffer));
-//    uint32_t num = endian_swap(*((uint32_t *)(buffer) + 1 ));
-
-//    // printf("%d\n", endian_swap(*(uint32_t *)(buffer)));
-//    // printf("%d\n", endian_swap(*((uint32_t *)(buffer) + 1 )));
-
-
-//    if( magic != 2049 )
-//    {
-//       perror("Wrong magic number for labels.\n");
-//       exit(EXIT_FAILURE);
-//    }
-
-//    for (int i = 0; i < num; ++i)
-//    {
-//       /* code */
-//       printf("%d", *(buffer + i));
-//    }
-//    return 0;
-// }   
