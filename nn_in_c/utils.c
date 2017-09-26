@@ -32,7 +32,7 @@ double linearSum(Node *curNode, Layer *prevLayer, int nodeCount) {
 	return sum;
 }
 
-void forwardPropagate(Network *nn, double bias) {
+void forwardPropagate(Network *nn) {
 	// move forward on the network and calculate each layer's output
 	Layer *inputLayer = nn->layers;
 	Layer *hiddenLayer = (Layer *)((uint8_t *)(inputLayer) + inputLayer->size);
@@ -42,14 +42,14 @@ void forwardPropagate(Network *nn, double bias) {
 	int output_node_count = outputLayer->node_count;
 	Node *hidden_node = hiddenLayer->nodes;
 	for (int i =0;i < hidden_node_count;i++) {
-		double sum = linearSum(hidden_node, inputLayer,input_node_count);
+		double sum = linearSum(hidden_node, inputLayer,input_node_count)+hidden_node->bias;
 		hidden_node->output = activate(sum);
 		hidden_node = (Node *)((uint8_t *)(hidden_node) + hidden_node->size);
 	}
 
 	Node *output_node = outputLayer->nodes;
 	for (int i =0;i < output_node_count;i++) {
-		double sum = linearSum(output_node, hiddenLayer, hidden_node_count);
+		double sum = linearSum(output_node, hiddenLayer, hidden_node_count)+output_node->bias;
 		output_node->output = activate(sum);
 		output_node = (Node *)((uint8_t *)(output_node) + output_node->size);
 	}
@@ -81,6 +81,7 @@ void backwardPropagate(Network *nn, Vector *expected) {
 		Node *node = outputLayer->nodes;
 		for (int j = 0;j < output_node_count;j++) {
 			sum += (node->error)*((node->weights)[i]);
+			node = (Node *)((uint8_t *)(node) + node->size);
 		}
 		hidden_node->error = fPrime*sum;
 		hidden_node = (Node *)((uint8_t *)(hidden_node) + hidden_node->size);
@@ -90,7 +91,36 @@ void backwardPropagate(Network *nn, Vector *expected) {
 }
 
 void updateWeights(Network *nn) {
+	double learning_rate = nn->learning_rate;
+	Layer *inputLayer = nn->layers;
+	Layer *hiddenLayer = (Layer *)((uint8_t *)(inputLayer) + inputLayer->size);
+	Layer *outputLayer = (Layer *)((uint8_t *)(hiddenLayer) + hiddenLayer->size);
+	int input_node_count = inputLayer->node_count;
+	int hidden_node_count = hiddenLayer->node_count;
+	int output_node_count = outputLayer->node_count;
+	Node *hidden_node = hiddenLayer->nodes;
+	for (int i =0;i < hidden_node_count;i++) {
+		hidden_node->bias += learning_rate*hidden_node->error;
+		Node *node = inputLayer->nodes;
+		for (int j = 0;j < input_node_count;j++) {
+			hidden_node->weights[j] += 
+			    learning_rate*node->output*hidden_node->error;
+			node = (Node *)((uint8_t *)(node) + node->size);
+		}
+		hidden_node = (Node *)((uint8_t *)(hidden_node) + hidden_node->size);
+	}
 
+	Node *output_node = outputLayer->nodes;
+	for (int i =0;i < output_node_count;i++) {
+		output_node->bias += learning_rate*output_node->error;
+		Node *node = hiddenLayer->nodes;
+		for (int j = 0;j < hidden_node_count;j++) {
+			output_node->weights[j] += 
+			    learning_rate*node->output*output_node->error;
+			node = (Node *)((uint8_t *)(node) + node->size);
+		}
+		output_node = (Node *)((uint8_t *)(output_node) + output_node->size);
+	}
 }
 
 

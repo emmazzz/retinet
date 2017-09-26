@@ -17,7 +17,7 @@ Network *createNeuralNetwork(inputSize,outputSize,hiddenSize) {
     
     Network *nn = (Network*)malloc(sizeof(Network)+inputLayerSize 
     	+ hiddenLayerSize + outputLayerSize);
-
+    nn->learning_rate = 1;
 
     // initialize input layer
     //nn->layers = (Layer *)malloc(inputLayerSize+hiddenLayerSize + outputLayerSize);
@@ -88,6 +88,8 @@ void initWeights(Network *nn) {
 	uint8_t *ptr = (uint8_t *)(((Layer *)layer)->nodes);
 	for (int j = 0;j < node_count;j++) {
 		Node *node = (Node *)ptr;
+		node->bias = rand()/(double)(RAND_MAX);
+		if (j % 2) node->bias = -1*node->bias;
 		for (int i = 0;i < node->weight_count;i++) {
 			node->weights[i] = 0.7*(rand()/(double)(RAND_MAX));
 			if (i%2) node->weights[i] = -1*node->weights[i];
@@ -100,6 +102,8 @@ void initWeights(Network *nn) {
 	ptr = (uint8_t *)(((Layer *)layer)->nodes);
 	for (int j = 0;j < node_count;j++) {
 		Node *node = (Node *)ptr;
+		node->bias = rand()/(double)(RAND_MAX);
+		if (j % 2) node->bias = -1*node->bias;
 		for (int i = 0;i < node->weight_count;i++) {
 			node->weights[i] = 0.7*(rand()/(double)(RAND_MAX));
 			if (i%2) node->weights[i] = -1*node->weights[i];
@@ -124,8 +128,8 @@ void printNetwork(Network *nn) {
 	printf("Number of nodes: %d\n", hiddenLayer->node_count);
 	curNode = hiddenLayer->nodes;
 	for (int i = 0;i < hiddenLayer->node_count;i++) {
-		printf("Node %d output is: %f  error is: %f\n", 
-			i, curNode->output,curNode->error);
+		printf("Node %d output is: %f  error is: %f bias is %f \n", 
+			i, curNode->output,curNode->error, curNode->bias);
 		printf("weights are\n");
 		for (int j = 0;j < curNode->weight_count;j++) {
 			printf("   %f\n", curNode->weights[j]);
@@ -139,8 +143,8 @@ void printNetwork(Network *nn) {
 	printf("Number of nodes: %d\n", outputLayer->node_count);
 	curNode = outputLayer->nodes;
 	for (int i = 0;i < outputLayer->node_count;i++) {
-		printf("Node %d output is: %f  error is: %f\n", 
-			i, curNode->output,curNode->error);
+		printf("Node %d output is: %f  error is: %f bias is %f \n", 
+			i, curNode->output,curNode->error, curNode->bias);
 		printf("weights are\n");
 		for (int j = 0;j < curNode->weight_count;j++) {
 			printf("   %f\n", curNode->weights[j]);
@@ -158,13 +162,15 @@ int main() {
 	inputs->vals[1] = 2;
 	feedInput(nn,inputs);
 	initWeights(nn);
-	forwardPropagate(nn,1);
 	Vector *expected = malloc(sizeof(Vector) + sizeof(double)*3);
 	expected->size = 3;
 	expected->vals[0] = 1;
 	expected->vals[1] = 0;
 	expected->vals[2] = 0;
+	forwardPropagate(nn);
 	backwardPropagate(nn,expected);
+	printNetwork(nn);
+	updateWeights(nn);
 	printNetwork(nn);
 	free(nn);
 	return 1;
