@@ -20,6 +20,7 @@ double activate(double val){
 double derivative(double val){
 	double eval = exp(val);
 	return eval/((1+eval)*(1+eval));
+	//return val*(1-val);
 }
 
 double linearSum(Node *curNode, Layer *prevLayer, int nodeCount) {

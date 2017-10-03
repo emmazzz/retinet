@@ -1,5 +1,10 @@
-typedef enum LayerType {CONV} LayerType;
-typedef enum AcFunType {SIGMOID} AcFunType;
+#ifndef _UTILS_H
+#define _UTILS_H
+
+
+
+// typedef enum LayerType {CONV} LayerType;
+// typedef enum AcFunType {SIGMOID} AcFunType;
 
 typedef struct Node Node;
 typedef struct Layer Layer;
@@ -16,8 +21,8 @@ struct Node {
 };
 
 struct Layer {
-	LayerType layer_type;
-	AcFunType acfun_type;
+	// LayerType layer_type;
+	// AcFunType acfun_type;
 	int node_count;
 	int size;
 	Node nodes[];
@@ -40,3 +45,5 @@ void feedInput(Network *nn, Vector *v);
 void forwardPropagate(Network *nn);
 void backwardPropagate(Network *nn, Vector *expected);
 void updateWeights(Network *nn);
+
+#endif
