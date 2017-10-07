@@ -20,7 +20,7 @@ Network *createNeuralNetwork(inputSize,hiddenSize, outputSize) {
     
     Network *nn = (Network*)malloc(sizeof(Network)+inputLayerSize 
     	+ hiddenLayerSize + outputLayerSize);
-    nn->learning_rate = 0.7;
+    nn->learning_rate = 0.4;
 
     // initialize input layer
     //nn->layers = (Layer *)malloc(inputLayerSize+hiddenLayerSize + outputLayerSize);
@@ -121,23 +121,23 @@ void printNetwork(Network *nn) {
 	printf("==== Input Layer ====\n");
 	printf("Number of nodes: %d\n", inputLayer->node_count);
 	Node *curNode = inputLayer->nodes;
-	// for (int i = 0;i < inputLayer->node_count;i++) {
-	// 	printf("Node %d output is: %f\n", i, curNode->output);
-	// 	curNode++;
-	// }
-	// printf("input size %d\n", inputLayer->size);
+	for (int i = 0;i < inputLayer->node_count;i++) {
+		printf("Node %d output is: %f\n", i, curNode->output);
+		curNode++;
+	}
+	//printf("input size %d\n", inputLayer->size);
 	Layer *hiddenLayer = (Layer *)((uint8_t *)nn->layers + inputLayer->size);
-	printf("==== Hidden Layer ====\n");
-	printf("Number of nodes: %d\n", hiddenLayer->node_count);
+	//printf("==== Hidden Layer ====\n");
+	//printf("Number of nodes: %d\n", hiddenLayer->node_count);
 	curNode = hiddenLayer->nodes;
 	for (int i = 0;i < hiddenLayer->node_count;i++) {
-		printf("Node %d output is: %f  error is: %f bias is %f \n", 
-			i, curNode->output,curNode->error, curNode->bias);
-		printf("weights are\n");
-		// for (int j = 0;j < curNode->weight_count;j++) {
-		// 	printf("   %f\n", curNode->weights[j]);
-		// }
-		printf("\n");
+		//printf("Node %d output is: %f  error is: %f bias is %f \n", 
+		//	i, curNode->output,curNode->error, curNode->bias);
+		//printf("weights are\n");
+		for (int j = 0;j < curNode->weight_count;j++) {
+			//printf("   %f\n", curNode->weights[j]);
+		}
+		//printf("\n");
 		curNode = (Node *)((uint8_t *)curNode + curNode->size);
 	}
 
@@ -148,11 +148,11 @@ void printNetwork(Network *nn) {
 	for (int i = 0;i < outputLayer->node_count;i++) {
 		printf("Node %d output is: %f  error is: %f bias is %f \n", 
 			i, curNode->output,curNode->error, curNode->bias);
-		printf("weights are\n");
+		//printf("weights are\n");
 		for (int j = 0;j < curNode->weight_count;j++) {
-			printf("   %f\n", curNode->weights[j]);
+			//printf("   %f\n", curNode->weights[j]);
 		}
-		printf("\n");
+		//printf("\n");
 		curNode = (Node *)((uint8_t *)curNode + curNode->size);
 	}
 }
@@ -190,11 +190,20 @@ int getClassification(Network *nn) {
 
 }
 
+void printInput(Vector *v) {
+	for (int i = 0; i < v->size; i++) {
+		printf("%f", v->vals[i]);
+	}
+	printf("enddd\n");
+}
+
 void trainNeuralNetwork(Network *nn) {
-	for (int i = 0;i < 50;i++) {
-		load_minist_init();
-		for (int j = 0;j < 1000; j ++) {
+	// for (int i = 0;i < 5;i++) {
+	// 	load_minist_init();
+		for (int j = 0;j < 8000; j ++) {
+
 			Vector *input = getNextImage();
+			// if (j < 2) printInput(input);
 			feedInput(nn,input);
 			int label = getNextLabel();
 			Vector *expected = expectedFromLabel(label);
@@ -202,28 +211,34 @@ void trainNeuralNetwork(Network *nn) {
 			backwardPropagate(nn,expected);
 			updateWeights(nn);
 			int class = getClassification(nn);
-			printf("label is %d classified as %d\n", label, class);			
+			//printf("label is %d classified as %d\n", label, class);			
 		}
-		free_mninst();
-	}
+		//free_mninst();
+	//}
 }
 
+
+
 void testNeuralNetwork(Network *nn) {
-	load_minist_init();
-	for (int j = 0;j < 10; j ++) {
+	//load_minist_init();
+	int num_correct = 0;
+	for (int j = 0;j < 2000; j ++) {
 		Vector *input = getNextImage();
+		
 		feedInput(nn,input);
 		int label = getNextLabel();
 		forwardPropagate(nn);
 		int class = getClassification(nn);
-		printf("label is %d classified as %d\n", label, class);
+		//printf("label is %d classified as %d\n", label, class);
+		if (label == class) num_correct += 1;
 	}
+	printf("accuracy %f\n", num_correct/2000.0);
 	free_mninst();
 
 }
 
 int main() {
-	Network *nn = createNeuralNetwork(724,30,10);
+	Network *nn = createNeuralNetwork(724,20,10);
 	load_minist_init();
 	// Vector *inputs = malloc(sizeof(Vector) + sizeof(double)*2);
 	// inputs->size = 2;

@@ -111,8 +111,9 @@ Vector *getNextImage()
 {
    for (int i = 0; i < data.image_rows * data.image_cols; ++i)
    {
-      data.cur_image->vals[i] = (double) fgetc(data.image_file);
+      data.cur_image->vals[i] = ((double) fgetc(data.image_file))/256.0;
    }
+   data.cur_image->size = 724;
    data.image_index++;
    return data.cur_image;
 }

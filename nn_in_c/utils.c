@@ -7,14 +7,16 @@ void feedInput(Network *nn, Vector *v) {
 	// feed the input to the first layer
 	Layer *inputLayer = nn->layers;
 	Node *curNode = inputLayer->nodes;
+	//printf("yo %d\n", v->size);
 	for (int i = 0;i < v->size;i++) {
+		//printf("yo %f\n", v->vals[i]);
 		curNode->output = v->vals[i];
 		curNode ++;
 	}
 }
 
 double activate(double val){
-	return 1.0/(1.0 + exp(-1*val));
+	return 1.0/(1.0 + exp(-1.0*val));
 }
 
 double derivative(double val){
@@ -69,15 +71,18 @@ void backwardPropagate(Network *nn, Vector *expected) {
 	// output error
 	Node *output_node = outputLayer->nodes;
 	for (int i =0;i < output_node_count;i++) {
-		output_node->error = -2*(output_node->output - 
-			expected->vals[i])*derivative(linearSum(output_node, hiddenLayer,hidden_node_count));
+		//output_node->error = -1*(output_node->output - 
+		//	expected->vals[i])*derivative(linearSum(output_node, hiddenLayer,hidden_node_count));
+		output_node->error = (expected->vals[i]
+			- output_node->output)* output_node->output*(1-output_node->output);
 		output_node = (Node *)((uint8_t *)(output_node) + output_node->size);
 	}
 
 	// hidden error
 	Node *hidden_node = hiddenLayer->nodes;
 	for (int i =0;i < hidden_node_count;i++) {
-		double fPrime = derivative(linearSum(hidden_node,inputLayer,input_node_count));
+		//double fPrime = derivative(linearSum(hidden_node,inputLayer,input_node_count));
+		double fPrime = hidden_node->output*(1-hidden_node->output);
 		double sum = 0;
 		Node *node = outputLayer->nodes;
 		for (int j = 0;j < output_node_count;j++) {
@@ -102,6 +107,7 @@ void updateWeights(Network *nn) {
 	Node *hidden_node = hiddenLayer->nodes;
 	for (int i =0;i < hidden_node_count;i++) {
 		hidden_node->bias += learning_rate*hidden_node->error;
+		//hidden_node->bias = 0;
 		Node *node = inputLayer->nodes;
 		for (int j = 0;j < input_node_count;j++) {
 			hidden_node->weights[j] += 
@@ -114,6 +120,7 @@ void updateWeights(Network *nn) {
 	Node *output_node = outputLayer->nodes;
 	for (int i =0;i < output_node_count;i++) {
 		output_node->bias += learning_rate*output_node->error;
+		//output_node->bias = 0;
 		Node *node = hiddenLayer->nodes;
 		for (int j = 0;j < hidden_node_count;j++) {
 			output_node->weights[j] += 
