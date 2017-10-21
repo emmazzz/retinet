@@ -122,7 +122,7 @@ void printNetwork(Network *nn) {
 	printf("Number of nodes: %d\n", inputLayer->node_count);
 	Node *curNode = inputLayer->nodes;
 	for (int i = 0;i < inputLayer->node_count;i++) {
-		printf("Node %d output is: %f\n", i, curNode->output);
+		//printf("Node %d output is: %f\n", i, curNode->output);
 		curNode++;
 	}
 	//printf("input size %d\n", inputLayer->size);
@@ -131,8 +131,8 @@ void printNetwork(Network *nn) {
 	//printf("Number of nodes: %d\n", hiddenLayer->node_count);
 	curNode = hiddenLayer->nodes;
 	for (int i = 0;i < hiddenLayer->node_count;i++) {
-		//printf("Node %d output is: %f  error is: %f bias is %f \n", 
-		//	i, curNode->output,curNode->error, curNode->bias);
+		printf("Node %d output is: %f  error is: %f bias is %f \n", 
+			i, curNode->output,curNode->error, curNode->bias);
 		//printf("weights are\n");
 		for (int j = 0;j < curNode->weight_count;j++) {
 			//printf("   %f\n", curNode->weights[j]);
@@ -220,21 +220,59 @@ void trainNeuralNetwork(Network *nn) {
 
 
 void testNeuralNetwork(Network *nn) {
-	//load_minist_init();
+	load_minist_init();
 	int num_correct = 0;
-	for (int j = 0;j < 2000; j ++) {
+	for (int j = 0;j < 1; j ++) {
 		Vector *input = getNextImage();
 		
 		feedInput(nn,input);
 		int label = getNextLabel();
 		forwardPropagate(nn);
 		int class = getClassification(nn);
-		//printf("label is %d classified as %d\n", label, class);
+		printf("label is %d classified as %d\n", label, class);
 		if (label == class) num_correct += 1;
+		printNetwork(nn);
 	}
-	printf("accuracy %f\n", num_correct/2000.0);
+	//printf("accuracy %f\n", num_correct/2000.0);
 	free_mninst();
 
+}
+
+void outputWeightsToFile(Network *nn) {
+	FILE *hidden = fopen("hidden.txt","w");
+
+	uint8_t *layer = (uint8_t *)nn->layers + nn->layers->size;
+	int node_count = ((Layer *)layer)->node_count;
+	uint8_t *ptr = (uint8_t *)(((Layer *)layer)->nodes);
+	fprintf(hidden, "{");
+	for (int j = 0;j < node_count;j++) {
+		Node *node = (Node *)ptr;
+		fprintf(hidden, "{ %0.5lf",node->bias);
+		for (int i = 0;i < node->weight_count;i++) {
+			fprintf(hidden, ",%0.5lf",node->weights[i]);
+		}
+		fprintf(hidden, "},\n");
+		ptr += node->size;
+	}
+	fprintf(hidden, "}");
+	fclose(hidden);
+
+	FILE *output = fopen("output.txt","w");
+	layer += ((Layer *)layer)->size;
+	node_count = ((Layer *)layer)->node_count;
+	ptr = (uint8_t *)(((Layer *)layer)->nodes);
+	fprintf(output, "{");
+	for (int j = 0;j < node_count;j++) {
+		Node *node = (Node *)ptr;
+		fprintf(output, "{ %0.5lf",node->bias);
+		for (int i = 0;i < node->weight_count;i++) {
+			fprintf(output, ",%0.5lf",node->weights[i]);
+		}
+		fprintf(output, "},\n");
+		ptr += node->size;
+	}
+	fprintf(output, "}");
+	fclose(output);
 }
 
 int main() {
@@ -257,6 +295,7 @@ int main() {
 	// updateWeights(nn);
 	// printNetwork(nn);
 	trainNeuralNetwork(nn);
+	outputWeightsToFile(nn);
 	testNeuralNetwork(nn);
 	free(nn);
 	return 1;
