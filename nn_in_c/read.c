@@ -90,13 +90,11 @@ int load_minist_init()
    inputs->vals[0] = 1;
    inputs->vals[1] = 2;
 
-
    data.cur_image = (Vector *)malloc(sizeof(Vector) 
                     + sizeof(double) * (data.image_rows * data.image_cols));
    data.cur_label = -1; // no data yet  
 
 
-  
    return 1;
 }
 

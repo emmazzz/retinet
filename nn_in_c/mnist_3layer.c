@@ -235,7 +235,6 @@ void testNeuralNetwork(Network *nn) {
 	}
 	//printf("accuracy %f\n", num_correct/2000.0);
 	free_mninst();
-
 }
 
 void outputWeightsToFile(Network *nn) {
