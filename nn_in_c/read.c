@@ -45,8 +45,8 @@ int load_minist_init()
 {
    // read labels
    char ch;
-   data.label_file = fopen("mnist_data/t10k-labels-idx1-ubyte","r"); // read mode
-   data.image_file = fopen("mnist_data/t10k-images-idx3-ubyte 2","r"); // read mode
+   data.label_file = fopen("mnist_data/train-labels-idx1-ubyte","r"); // read mode
+   data.image_file = fopen("mnist_data/train-images-idx3-ubyte","r"); // read mode
  
    if( data.label_file == NULL || data.image_file == NULL)
    {

@@ -200,17 +200,20 @@ void printInput(Vector *v) {
 void trainNeuralNetwork(Network *nn) {
 	// for (int i = 0;i < 5;i++) {
 	// 	load_minist_init();
-		for (int j = 0;j < 8000; j ++) {
+		for (int j = 0;j < 60000; j ++) {
 
 			Vector *input = getNextImage();
-			// if (j < 2) printInput(input);
-			feedInput(nn,input);
 			int label = getNextLabel();
+			// if (j < 2) printInput(input);
+			for (int i = 0; i < 5;i++) {
+			feedInput(nn,input);
+			
 			Vector *expected = expectedFromLabel(label);
 			forwardPropagate(nn);
 			backwardPropagate(nn,expected);
 			updateWeights(nn);
-			int class = getClassification(nn);
+			}s
+			// int class = getClassification(nn);
 			//printf("label is %d classified as %d\n", label, class);			
 		}
 		//free_mninst();
