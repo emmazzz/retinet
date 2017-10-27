@@ -7,7 +7,7 @@
 
 #define NUM_DIGITS 10
 
-
+double delta = 0.1;
 
 Network *createNeuralNetwork(inputSize,hiddenSize, outputSize) {
 	// allocate appropriate size of memory
@@ -20,7 +20,7 @@ Network *createNeuralNetwork(inputSize,hiddenSize, outputSize) {
     
     Network *nn = (Network*)malloc(sizeof(Network)+inputLayerSize 
     	+ hiddenLayerSize + outputLayerSize);
-    nn->learning_rate = 0.4;
+    nn->learning_rate = delta;
 
     // initialize input layer
     //nn->layers = (Layer *)malloc(inputLayerSize+hiddenLayerSize + outputLayerSize);
@@ -197,47 +197,47 @@ void printInput(Vector *v) {
 	printf("enddd\n");
 }
 
-void trainNeuralNetwork(Network *nn) {
+void trainNeuralNetwork(Network *nn, int numEpoch, int numTrain) {
 	// for (int i = 0;i < 5;i++) {
-	// 	load_minist_init();
-		for (int j = 0;j < 60000; j ++) {
+	 	load_mnist_init_train();
+		for (int j = 0;j < numTrain; j ++) {
 
-			Vector *input = getNextImage();
-			int label = getNextLabel();
+			Vector *input = getNextImageTrain();
+			int label = getNextLabelTrain();
 			// if (j < 2) printInput(input);
-			for (int i = 0; i < 5;i++) {
-			feedInput(nn,input);
-			
-			Vector *expected = expectedFromLabel(label);
-			forwardPropagate(nn);
-			backwardPropagate(nn,expected);
-			updateWeights(nn);
-			}s
+			for (int i = 0; i < numEpoch;i++) {
+				feedInput(nn,input);
+				
+				Vector *expected = expectedFromLabel(label);
+				forwardPropagate(nn);
+				backwardPropagate(nn,expected);
+				updateWeights(nn);
+			}
 			// int class = getClassification(nn);
 			//printf("label is %d classified as %d\n", label, class);			
 		}
-		//free_mninst();
+		free_mnist_train();
 	//}
 }
 
 
 
 void testNeuralNetwork(Network *nn) {
-	load_minist_init();
+	load_mnist_init_test();
 	int num_correct = 0;
-	for (int j = 0;j < 1; j ++) {
-		Vector *input = getNextImage();
+	for (int j = 0;j < 2000; j ++) {
+		Vector *input = getNextImageTest();
 		
 		feedInput(nn,input);
-		int label = getNextLabel();
+		int label = getNextLabelTest();
 		forwardPropagate(nn);
 		int class = getClassification(nn);
-		printf("label is %d classified as %d\n", label, class);
+		//printf("label is %d classified as %d\n", label, class);
 		if (label == class) num_correct += 1;
-		printNetwork(nn);
+		//printNetwork(nn);
 	}
-	//printf("accuracy %f\n", num_correct/2000.0);
-	free_mninst();
+	printf("accuracy %f\n", num_correct/2000.0);
+	free_mnist_test();
 }
 
 void outputWeightsToFile(Network *nn) {
@@ -278,8 +278,8 @@ void outputWeightsToFile(Network *nn) {
 }
 
 int main() {
-	Network *nn = createNeuralNetwork(724,20,10);
-	load_minist_init();
+	Network *nn = createNeuralNetwork(724,70,10);
+	//load_minist_init();
 	// Vector *inputs = malloc(sizeof(Vector) + sizeof(double)*2);
 	// inputs->size = 2;
 	// inputs->vals[0] = 1;
@@ -296,7 +296,7 @@ int main() {
 	// printNetwork(nn);
 	// updateWeights(nn);
 	// printNetwork(nn);
-	trainNeuralNetwork(nn);
+	trainNeuralNetwork(nn,3,55000);
 	outputWeightsToFile(nn);
 	testNeuralNetwork(nn);
 	free(nn);

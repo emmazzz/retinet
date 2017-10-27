@@ -6,9 +6,14 @@
 #include <string.h>
 
 
-void free_mninst();
-Vector *getNextImage();
-int getNextLabel();
-int load_minist_init();
+void free_mnist_test();
+Vector *getNextImageTest();
+int getNextLabelTest();
+int load_mnist_init_test();
+
+void free_mnist_train();
+Vector *getNextImageTrain();
+int getNextLabelTrain();
+int load_mnist_init_train();
 
 #endif

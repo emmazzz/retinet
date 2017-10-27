@@ -26,7 +26,25 @@ static struct
 
    Vector *cur_image;
    int cur_label;   
-} data;
+} data_test;
+
+static struct
+{
+   // mnist format data
+   uint32_t data_size;
+   FILE *image_file;
+   FILE *label_file;
+   uint32_t image_rows;
+   uint32_t image_cols;
+
+   // bookkeeping
+   uint32_t image_index;
+   uint32_t label_index;
+
+   Vector *cur_image;
+   int cur_label;   
+} data_train;
+
 
 static uint32_t endian_swap(uint32_t x)
 {
@@ -40,15 +58,14 @@ static uint32_t endian_swap(uint32_t x)
 // void free_mninst();
 // Vector *getNextImage();
 // int getNextLabel();
-
-int load_minist_init()
+int load_mnist_init_train()
 {
    // read labels
    char ch;
-   data.label_file = fopen("mnist_data/train-labels-idx1-ubyte","r"); // read mode
-   data.image_file = fopen("mnist_data/train-images-idx3-ubyte","r"); // read mode
+   data_train.label_file = fopen("mnist_data/train-labels-idx1-ubyte","r"); // read mode
+   data_train.image_file = fopen("mnist_data/train-images-idx3-ubyte","r"); // read mode
  
-   if( data.label_file == NULL || data.image_file == NULL)
+   if( data_train.label_file == NULL || data_train.image_file == NULL)
    {
       perror("Error while opening the mnist file.\n");
       exit(EXIT_FAILURE);
@@ -57,8 +74,8 @@ int load_minist_init()
    // check magic number
    uint32_t label_magic_read;
    uint32_t image_magic_read;
-   fread(&label_magic_read, 4, 1, data.label_file);
-   fread(&image_magic_read, 4, 1, data.image_file);
+   fread(&label_magic_read, 4, 1, data_train.label_file);
+   fread(&image_magic_read, 4, 1, data_train.image_file);
    assert(endian_swap(label_magic_read)==LABEL_MAGIC);
    assert(endian_swap(image_magic_read)==IMAGES_MAGIC);
    printf("%d read label \n", endian_swap(label_magic_read));
@@ -66,82 +83,182 @@ int load_minist_init()
    // check data size matches
    uint32_t label_num;
    uint32_t image_num;
-   fread(&label_num, 4, 1, data.label_file);
-   fread(&image_num, 4, 1, data.image_file);
+   fread(&label_num, 4, 1, data_train.label_file);
+   fread(&image_num, 4, 1, data_train.image_file);
    assert(label_num == image_num);
-   data.data_size = endian_swap(label_num);
-   printf("%d read size \n", data.data_size);
+   data_train.data_size = endian_swap(label_num);
+   printf("%d read size \n", data_train.data_size);
    
    // save row and cols
    uint32_t tmp_row, tmp_col;
-   fread(&tmp_row, 4, 1, data.image_file);
-   fread(&tmp_col, 4, 1, data.image_file);
-   data.image_rows = endian_swap(tmp_row);
-   data.image_cols = endian_swap(tmp_col);
-   printf("%d read row \n", data.image_rows);
-   printf("%d read col \n", data.image_cols);
+   fread(&tmp_row, 4, 1, data_train.image_file);
+   fread(&tmp_col, 4, 1, data_train.image_file);
+   data_train.image_rows = endian_swap(tmp_row);
+   data_train.image_cols = endian_swap(tmp_col);
+   printf("%d read row \n", data_train.image_rows);
+   printf("%d read col \n", data_train.image_cols);
 
    // init other data
-   data.image_index = 0;
-   data.label_index = 0;
+   data_train.image_index = 0;
+   data_train.label_index = 0;
 
    Vector *inputs = malloc(sizeof(Vector) + sizeof(double)*2);
    inputs->size = 2;
    inputs->vals[0] = 1;
    inputs->vals[1] = 2;
 
-   data.cur_image = (Vector *)malloc(sizeof(Vector) 
-                    + sizeof(double) * (data.image_rows * data.image_cols));
-   data.cur_label = -1; // no data yet  
+   data_train.cur_image = (Vector *)malloc(sizeof(Vector) 
+                    + sizeof(double) * (data_train.image_rows * data_train.image_cols));
+   data_train.cur_label = -1; // no data yet  
 
 
    return 1;
 }
 
-void free_mninst()
+void free_mnist_train()
 {
-   free(data.cur_image);
-   fclose(data.label_file);
-   fclose(data.image_file);
+   free(data_train.cur_image);
+   fclose(data_train.label_file);
+   fclose(data_train.image_file);
 }
 
-Vector *getNextImage()
+Vector *getNextImageTrain()
 {
-   for (int i = 0; i < data.image_rows * data.image_cols; ++i)
+   for (int i = 0; i < data_train.image_rows * data_train.image_cols; ++i)
    {
-      data.cur_image->vals[i] = ((double) fgetc(data.image_file))/256.0;
+      data_train.cur_image->vals[i] = ((double) fgetc(data_train.image_file))/256.0;
    }
-   data.cur_image->size = 724;
-   data.image_index++;
-   return data.cur_image;
+   data_train.cur_image->size = 724;
+   data_train.image_index++;
+   return data_train.cur_image;
 }
 
-int getNextLabel(){
-   data.cur_label = (int) fgetc(data.label_file);
-   return data.cur_label;
+int getNextLabelTrain(){
+   data_train.cur_label = (int) fgetc(data_train.label_file);
+   return data_train.cur_label;
 }
 
-/*
-int main()
+
+
+int load_mnist_init_test()
 {
-   // init
-   load_minist_init();
-
-   // call api
-   Vector *inputs = getNextImage();
-   int label = getNextLabel();
+   // read labels
+   char ch;
+   data_test.label_file = fopen("mnist_data/t10k-labels-idx1-ubyte","r"); // read mode
+   data_test.image_file = fopen("mnist_data/t10k-images-idx3-ubyte 2","r"); // read mode
+ 
+   if( data_test.label_file == NULL || data_test.image_file == NULL)
+   {
+      perror("Error while opening the mnist file.\n");
+      exit(EXIT_FAILURE);
+   }
    
-   // check output
-   // printf("%d\n", label);
-   // for (int i = 0; i < 784; ++i)
-   // {
-   //    label = inputs->vals[i];
-   //    printf("%d\n", label);
-   // }
+   // check magic number
+   uint32_t label_magic_read;
+   uint32_t image_magic_read;
+   fread(&label_magic_read, 4, 1, data_test.label_file);
+   fread(&image_magic_read, 4, 1, data_test.image_file);
+   assert(endian_swap(label_magic_read)==LABEL_MAGIC);
+   assert(endian_swap(image_magic_read)==IMAGES_MAGIC);
+   printf("%d read label \n", endian_swap(label_magic_read));
 
-   // free data
-   free_mninst();
-   return 0;
+   // check data size matches
+   uint32_t label_num;
+   uint32_t image_num;
+   fread(&label_num, 4, 1, data_test.label_file);
+   fread(&image_num, 4, 1, data_test.image_file);
+   assert(label_num == image_num);
+   data_test.data_size = endian_swap(label_num);
+   printf("%d read size \n", data_test.data_size);
+   
+   // save row and cols
+   uint32_t tmp_row, tmp_col;
+   fread(&tmp_row, 4, 1, data_test.image_file);
+   fread(&tmp_col, 4, 1, data_test.image_file);
+   data_test.image_rows = endian_swap(tmp_row);
+   data_test.image_cols = endian_swap(tmp_col);
+   printf("%d read row \n", data_test.image_rows);
+   printf("%d read col \n", data_test.image_cols);
+
+   // init other data
+   data_test.image_index = 0;
+   data_test.label_index = 0;
+
+   Vector *inputs = malloc(sizeof(Vector) + sizeof(double)*2);
+   inputs->size = 2;
+   inputs->vals[0] = 1;
+   inputs->vals[1] = 2;
+
+   data_test.cur_image = (Vector *)malloc(sizeof(Vector) 
+                    + sizeof(double) * (data_test.image_rows * data_test.image_cols));
+   data_test.cur_label = -1; // no data yet  
+
+
+   return 1;
 }
-*/
+
+void free_mnist_test()
+{
+   free(data_test.cur_image);
+   fclose(data_test.label_file);
+   fclose(data_test.image_file);
+}
+
+Vector *getNextImageTest()
+{
+   for (int i = 0; i < data_test.image_rows * data_test.image_cols; ++i)
+   {
+      data_test.cur_image->vals[i] = ((double) fgetc(data_test.image_file))/256.0;
+   }
+   data_test.cur_image->size = 724;
+   data_test.image_index++;
+   return data_test.cur_image;
+}
+
+int getNextLabelTest(){
+   data_test.cur_label = (int) fgetc(data_test.label_file);
+   return data_test.cur_label;
+}
+
+
+// int main()
+// {
+//    // init
+//    load_mnist_init_test();
+
+//    // call api
+//    Vector *inputs = getNextImageTest();
+//    int label = getNextLabelTest();
+   
+//    // check output
+//    printf("%d\n", label);
+//    for (int i = 0; i < 784; ++i)
+//    {
+//       double inp = inputs->vals[i];
+//       printf("%f\n", inp);
+//    }
+
+//    // free data
+//    free_mnist_test();
+
+//    // init
+//    load_mnist_init_train();
+
+//    // call api
+//    inputs = getNextImageTrain();
+//    label = getNextLabelTrain();
+   
+//    // check output
+//    printf("%d\n", label);
+//    for (int i = 0; i < 784; ++i)
+//    {
+//       double inp = inputs->vals[i];
+//       printf("%f\n", inp);
+//    }
+
+//    // free data
+//    free_mnist_train();
+//    return 0;
+// }
+
 
