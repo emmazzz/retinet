@@ -38,9 +38,9 @@ int main() {
 	// 		input[i] = inp->vals[i];
 	// 	}
 
-	for (int i = 0;i < 20;i++) {
+	for (int i = 0;i < 70;i++) {
 		double sum = hiddenWeights[i][0];
-		for (int j = 1;j < 725;j++) {
+		for (int j = 1;j < 785;j++) {
 			sum += hiddenWeights[i][j]*input[j-1];
 		}
 		// activate
@@ -52,7 +52,7 @@ int main() {
 
 	for (int i = 0;i < 10;i++) {
 		double sum = outputWeights[i][0];
-		for (int j = 1;j < 21;j++) {
+		for (int j = 1;j < 71;j++) {
 			sum += outputWeights[i][j]*hidOut[j-1];
 		}
 		// activate
