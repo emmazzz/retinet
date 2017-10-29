@@ -1,5 +1,4 @@
 #include "inf.h"
-#include "read.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -16,27 +15,11 @@ int main() {
 		int tmp, bla;
 		fread(&tmp, 4, 1, f);
 		fread(&bla, 4, 1, f);
-		//double temp =(double) fgetc(f);
 		double temp = (double) tmp;
 		printf("%f\n", temp);
 		input[i] = temp/256.0;
 		
 	}
-	
-
-
-
-	// emma
-
-	// load_minist_init();
-	// int numC = 0;
-	// for (int k = 0;k < 10000;k++) {
-	// 	Vector *inp = getNextImage();
-	// 	int label = getNextLabel();
-	// 	if (k < 8000) continue;
-	// 	for (int i = 0;i < 724;i++) {
-	// 		input[i] = inp->vals[i];
-	// 	}
 
 	for (int i = 0;i < 70;i++) {
 		double sum = hiddenWeights[i][0];
@@ -65,13 +48,10 @@ int main() {
 
 	}
 
-		
-	// 	if (res == label) numC ++;
+	// printf("result is %d\n" ,res);
 
-	printf("result is %d\n" ,res);
-	// }
-
+	// Show accuracy if under multiple runs
 	// printf("accuracy %f\n", numC/2000.0);
 
-	
+	return res;
 }
