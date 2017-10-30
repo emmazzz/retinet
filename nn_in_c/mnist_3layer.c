@@ -278,7 +278,7 @@ void outputWeightsToFile(Network *nn) {
 }
 
 int main() {
-	Network *nn = createNeuralNetwork(784,70,10);
+	Network *nn = createNeuralNetwork(784,40,10);
 	//load_minist_init();
 	// Vector *inputs = malloc(sizeof(Vector) + sizeof(double)*2);
 	// inputs->size = 2;
