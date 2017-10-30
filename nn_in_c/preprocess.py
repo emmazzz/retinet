@@ -1,41 +1,11 @@
 import cv2
 import numpy as np
 import math
+import os
+import serial
+import time
+
 ###############################
-# Windows dependencies
-# - Python 2.7.6: http://www.python.org/download/
-# - OpenCV: http://opencv.org/
-# - Numpy -- get numpy from here because the official builds don't support x64:
-#   http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
-
-# Mac Dependencies
-# - brew install python
-# - pip install numpy
-# - brew tap homebrew/science
-# - brew install opencv
-
-
-
-# cap = cv2.VideoCapture(0)
-# i = 0
-# while(True):
-#     ret, frame = cap.read()
-#     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
-#     i+=1
-#     cv2.imshow('frame', rgb)
-#     if cv2.waitKey(1) & 0xFF == ord('q'):
-#         out = cv2.imwrite('capture%d.jpg'%(i), frame)
-#     if cv2.waitKey(1) & 0xFF == ord('l'):
-#         break
-
-# cap.release()
-
-
-# # cv2.destroyAllWindows()
-
-# ##############################
-# from matplotlib import pyplot as plt
-
 def crop_image(img,tol=1):
     # img is image data
     # tol  is tolerance
@@ -46,7 +16,7 @@ def crop_image(img,tol=1):
 def recenter(cropped, s = 28):
     w, h = np.shape(cropped)
     ml = max(w, h)
-    pad = ml//16
+    pad = ml//12
     l = ml + 2*pad
     l = math.ceil(l//28) *28
     final = np.zeros((l,l), dtype=np.int)
@@ -73,38 +43,193 @@ def resize(input, s = 28):
             final[r,c] = total
     return final
 
+def getOnePic(cap):
+    i = 1000
+    while(True):
+        ret, frame = cap.read()
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
+        i+=1
+        # cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow('frame', 600,600)
 
-                    
+        cv2.imshow('frame', rgb)
+        key = cv2.waitKey(100)
+        # print(key)
+        if key & 0xFF == ord('t'):
+            out = cv2.imwrite('capture.jpg', frame)
+            break
+        if key & 0xFF == ord('q'):
+            break
+
+
+WIDTH = 1920//2
+HIGHT = 1080//2
+cap = cv2.VideoCapture(0)
+cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
+cv2.resizeWindow('frame', WIDTH,HIGHT)
+
+t = 0
+while t < 9:
+    # took picture named "capture.jpg"
+    # time.sleep(0.5) 
+    ret, frame = cap.read()
+    # cv2.imwrite('capturelala%d.jpg'%t, frame)
+
+    # getOnePic(cap)
+    
+    # preprocess image
+    # img = cv2.imread("capture.jpg", 0);
+    img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    ret,thresh = cv2.threshold(img,127,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C)
+    cropped = crop_image(thresh)
+    result = recenter(cropped)
+    resized_image = resize(result)
+    byte_array = np.ndarray.flatten(resized_image)
+
+    # write to os
+    result = " ".join(["%03d"%x for x in byte_array])
+
+    # sd = serial.Serial("/dev/tty.usbmodem1461",115200)
+    # sd.write(b"%s"%result)
+
+    # while sd.in_waiting:
+    #     result = sd.readline().decode("utf-8").strip()
+    #     print("yo: %s"%result)
+
+    result = "9"
 
 
 
-# read image as breyscale
-img = cv2.imread("m3.jpg", 0);
+    # Create a black image
+    img = cv2.resize(frame, (WIDTH, HIGHT)) 
 
-# turn into binary
-ret,thresh = cv2.threshold(img,127,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C)
+    # Write some Text
 
-# crop out white bg
-cropped = crop_image(thresh)
+    font                   = cv2.FONT_HERSHEY_SIMPLEX
+    bottomLeftCornerOfText = (10,500)
+    fontScale              = 2
+    fontColor              = (200,200,200)
+    lineType               = 2
 
-cv2.imwrite('pre1.jpg', cropped)
-# recenter it
-result = recenter(cropped)
-cv2.imwrite('pre2.jpg', result)
+    cv2.putText(img,'Retinet sees a %s'%result, 
+        bottomLeftCornerOfText, 
+        font, 
+        fontScale,
+        fontColor,
+        lineType)
 
-#resize to 26 by 26
-img = cv2.imread("pre2.jpg", 0);
+    #Display the image
+    cv2.imshow("frame",img)
+    cv2.waitKey(1)
 
-resized_image = resize(result)
-# resized_image = cv2.resize(img, (28, 28)) 
+    print(t)
+    print()
 
-cv2.imwrite('pre33.jpg',resized_image)
-byte_array = np.ndarray.flatten(resized_image)
-print(byte_array)
 
-with open("processed", 'wb') as output:
-    output.write(byte_array)
-    # output.write(bytearray([(255-x) for x in byte_array]))
+
+    # with open("processed.txt", 'w') as output:
+    #     output.write(result)
+    # tmp = os.system("python2 sendToUart.py")
+
+    # # print("hello")
+    # with open("label.txt", "r") as f:
+    #     result = f.read()
+    #     print(result)
+
+    t+=1
+
+
+
+
+cap.release()
+cv2.destroyAllWindows()
+
+
+
+
+
+
+###############################
+###############################
+###############################
+# Windows dependencies
+# - Python 2.7.6: http://www.python.org/download/
+# - OpenCV: http://opencv.org/
+# - Numpy -- get numpy from here because the official builds don't support x64:
+#   http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
+
+# Mac Dependencies
+# - brew install python
+# - pip install numpy
+# - brew tap homebrew/science
+# - brew install opencv
+
+
+# cap = cv2.VideoCapture(0)
+# i = 0
+# while(True):
+#     ret, frame = cap.read()
+#     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
+#     i+=1
+#     cv2.imshow('frame', rgb)
+#     if cv2.waitKey(1) & 0xFF == ord('t'):
+#         out = cv2.imwrite('capture%d.jpg'%(i), frame)
+#     if cv2.waitKey(1) & 0xFF == ord('q'):
+#         break
+
+# cap.release()
+# cv2.destroyAllWindows()
+
+# ##############################
+# from matplotlib import pyplot as plt
+
+
+
+
+# for i in [0,1,2,3,4,5,6,7,8,9]:
+#     # read image as breyscale
+#     img = cv2.imread("capture%d.jpg"%i, 0);
+
+#     # turn into binary
+#     ret,thresh = cv2.threshold(img,127,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C)
+
+#     # crop out white bg
+#     cropped = crop_image(thresh)
+
+#     # cv2.imwrite('pre1-%d.jpg'%i, cropped)
+#     # recenter it
+#     result = recenter(cropped)
+#     # cv2.imwrite('pre2-%d.jpg'%i, result)
+
+#     #resize to 26 by 26
+#     img = cv2.imread("pre3-%d.jpg"%i, 0);
+
+#     resized_image = resize(result)
+#     # resized_image = cv2.resize(img, (28, 28)) 
+
+#     cv2.imwrite('pre4-%d.jpg'%i,resized_image)
+#     byte_array = np.ndarray.flatten(resized_image)
+
+
+#     # option1 write to os
+#     # result = " ".join(["%03d"%x for x in byte_array])
+#     # os.system("")
+#     # print(result)
+
+
+#     #option2 write to file
+#     # print(byte_array)
+#     with open("processed%d"%i, 'wb') as output:
+#         output.write(byte_array)
+
+
+
+
+
+
+
+    # with output.write(bytearray([(255-x) for x in byte_array]))
+    # with open("processed%d"%i, 'rb') as output:
 
 
 

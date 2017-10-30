@@ -3,24 +3,60 @@
 #include <stdio.h>
 #include <math.h>
 
-double input[724];
-double hidOut[20];
+double input[784];
+double hidOut[70];
 
 
 int main() {
 
 	// write into input
-	FILE *f = fopen("processed","r");
-	for (int i = 0; i < 28*28; ++i)
+	for (int label = 0; label < 10; ++label)
 	{
-		int tmp, bla;
-		fread(&tmp, 4, 1, f);
-		fread(&bla, 4, 1, f);
-		//double temp =(double) fgetc(f);
-		double temp = (double) tmp;
-		printf("%f\n", temp);
-		input[i] = temp/256.0;
-		
+		// int i = 9;
+		char file[40];
+		sprintf(file, "processed%d",label);
+		//printf("%s\n", file);
+		FILE *f = fopen(file,"r");
+
+		for (int i = 0; i < 28*28; ++i)
+		{
+			int tmp, bla;
+			fread(&tmp, 4, 1, f);
+			fread(&bla, 4, 1, f);
+			//double temp = (double) fgetc(f);
+			double temp = (double) tmp;
+			//printf("%f\n", temp);
+			input[i] = temp/256.0;
+			
+		}
+		for (int i = 0;i < 70;i++) {
+			double sum = hiddenWeights[i][0];
+			for (int j = 1;j < 785;j++) {
+				sum += hiddenWeights[i][j]*input[j-1];
+			}
+			// activate
+			hidOut[i] = 1.0/(1.0 + exp(-1.0*sum));
+		}
+
+		double maxProb = 0;
+		int res = 0;
+		for (int i = 0;i < 10;i++) {
+			double sum = outputWeights[i][0];
+			for (int j = 1;j < 71;j++) {
+				sum += outputWeights[i][j]*hidOut[j-1];
+			}
+			// activate
+			sum = 1.0/(1.0 + exp(-1.0*sum));
+			//printf("%d: prob = %f\n", i, sum);
+			if (sum > maxProb) {
+				maxProb = sum;
+				res = i;
+			}
+		}	
+
+		printf("Should be %d\n", label);
+		printf("result is %d\n\n" ,res);
+
 	}
 	
 
@@ -28,47 +64,48 @@ int main() {
 
 	// emma
 
-	// load_minist_init();
+	// load_mnist_init_test();
 	// int numC = 0;
-	// for (int k = 0;k < 10000;k++) {
-	// 	Vector *inp = getNextImage();
-	// 	int label = getNextLabel();
-	// 	if (k < 8000) continue;
-	// 	for (int i = 0;i < 724;i++) {
+	// for (int k = 0;k < 2000;k++) {
+	// 	//printf("%d\n", k);
+	// 	Vector *inp = getNextImageTest();
+	// 	int label = getNextLabelTest();
+	// 	//if (k < 8000) continue;
+	// 	for (int i = 0;i < 784;i++) {
 	// 		input[i] = inp->vals[i];
 	// 	}
 
-	for (int i = 0;i < 70;i++) {
-		double sum = hiddenWeights[i][0];
-		for (int j = 1;j < 785;j++) {
-			sum += hiddenWeights[i][j]*input[j-1];
-		}
-		// activate
-		hidOut[i] = 1.0/(1.0 + exp(-1.0*sum));
-	}
+	// 	for (int i = 0;i < 70;i++) {
+	// 		double sum = hiddenWeights[i][0];
+	// 		for (int j = 1;j < 785;j++) {
+	// 			sum += hiddenWeights[i][j]*input[j-1];
+	// 		}
+	// 		// activate
+	// 		hidOut[i] = 1.0/(1.0 + exp(-1.0*sum));
+	// 	}
 
-	double maxProb = 0;
-	int res = 0;
+	// 	double maxProb = 0;
+	// 	int res = 0;
 
-	for (int i = 0;i < 10;i++) {
-		double sum = outputWeights[i][0];
-		for (int j = 1;j < 71;j++) {
-			sum += outputWeights[i][j]*hidOut[j-1];
-		}
-		// activate
-		sum = 1.0/(1.0 + exp(-1.0*sum));
-		printf("%d: prob = %f\n", i, sum);
-		if (sum > maxProb) {
-			maxProb = sum;
-			res = i;
-		}
+	// 	for (int i = 0;i < 10;i++) {
+	// 		double sum = outputWeights[i][0];
+	// 		for (int j = 1;j < 71;j++) {
+	// 			sum += outputWeights[i][j]*hidOut[j-1];
+	// 		}
+	// 		// activate
+	// 		sum = 1.0/(1.0 + exp(-1.0*sum));
+	// 		printf("%d: prob = %f\n", i, sum);
+	// 		if (sum > maxProb) {
+	// 			maxProb = sum;
+	// 			res = i;
+	// 		}
 
-	}
+	// 	}
 
 		
 	// 	if (res == label) numC ++;
 
-	printf("result is %d\n" ,res);
+	// 	printf("result is %d\n" ,res);
 	// }
 
 	// printf("accuracy %f\n", numC/2000.0);
