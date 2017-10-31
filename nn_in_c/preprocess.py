@@ -33,12 +33,14 @@ def resize(input, s = 28):
     final = np.zeros((s,s), dtype=np.int)
 
     d = w//s
+    if d ==0: return final
     for r in range(s):
         for c in range(s):
             total = 0
             for dr in range(d):
                 for dc in range(d):
                     total += input[r*d+dr,c*d+dc]
+
             total //= (d**2)
             final[r,c] = total
     return final
@@ -63,15 +65,17 @@ def getOnePic(cap):
 
 
 WIDTH = 1920//2
-HIGHT = 1080//2
-cap = cv2.VideoCapture(0)
+HEIGHT = 1080//2
+cap = cv2.VideoCapture(1)
 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
-cv2.resizeWindow('frame', WIDTH,HIGHT)
+cv2.resizeWindow('frame', WIDTH,HEIGHT)
 
 t = 0
-while t < 4:
+sd = serial.Serial("/dev/tty.usbmodem1411",115200)
+
+while t < 300:
     # took picture named "capture.jpg"
-    time.sleep(2) 
+    time.sleep(1) 
     ret, frame = cap.read()
     # cv2.imwrite('capturelala%d.jpg'%t, frame)
     # getOnePic(cap)
@@ -93,10 +97,10 @@ while t < 4:
     byte_array = np.ndarray.flatten(resized_image)
     byte_array = byte_array[::-1]
 
-    cv2.imwrite('testing%d.jpg'%t, np.reshape(byte_array, (28, 28)))
+    cv2.imwrite('testing%d.jpg'%(t%10), np.reshape(byte_array, (28, 28)))
 
     # write to os
-    result = " ".join(["%03d"%x for x in byte_array])
+    resultstr = " ".join(["%03d"%x for x in byte_array])+" "
 
     # sd = serial.Serial("/dev/tty.usbmodem1461",115200)
     # sd.write(b"%s"%result)
@@ -105,25 +109,52 @@ while t < 4:
     #     result = sd.readline().decode("utf-8").strip()
     #     print("yo: %s"%result)
 
-    result = "9"
+    
+    # t = 0
+    # l = ["%03d"%(random.randint(0, 255)) for i in range(784)]
+    # while (t < 5):
+        # print(t)
+        # time.sleep(1)
+        # result = " ".join(l)
+        # result += " "
+        # print("result: %s"%result)
+
+        
+    sd.write(bytearray(resultstr, 'utf-8'))
+    print("finished sending")
+
+    received = False
+    while True:
+        if received:
+            break
+        if sd.in_waiting:
+            print(sd.in_waiting)
+            result = sd.readline().decode("utf-8").strip()
+            print("yo: %s"%result)
+
+            received = True
+        # t+=1
+
+    if result.startwith("inf_kernel()"):
+        result = result[len(result)-3:]
+    # result = "9"
 
 
 
     # Create a black image
-    img = cv2.resize(img, (WIDTH, HIGHT))
-    # img = np.zeros((WIDTH,HIGHT), dtype=np.uint8)
-    # for row in range(WIDTH):
-    #     img[row] = img2[WIDTH - row- 1][::-1]
-
-    # print(img) 
+    img = cv2.resize(img, (WIDTH, HEIGHT))
+   
+    img = np.flipud(np.fliplr(img))
+    
+    img = np.array(img)
 
 
     # Write some Text
 
     font                   = cv2.FONT_HERSHEY_SIMPLEX
     bottomLeftCornerOfText = (10,500)
-    fontScale              = 2
-    fontColor              = (200,200,200)
+    fontScale              = 1
+    fontColor              = (250,250,250)
     lineType               = 2
 
 
