@@ -2,12 +2,21 @@
 #include <stdio.h>
 #include <math.h>
 
+<<<<<<< HEAD
+#define CAPSTONE_HLS
+=======
+>>>>>>> 021f73cd03ec45b6fa62c6ce4296dc823a46c1fa
 
 double inf_input[784];
-double hidOut[70];
-double tmp[72];
+double hidOut[40];
+#ifdef CAPSTONE_HLS
+double tmp[41];
+#endif
 double probs[10];
 
+<<<<<<< HEAD
+int main() {
+=======
 
 #define CAPSTONE_HLS
 
@@ -116,6 +125,7 @@ double probs[10];
 // 	return res;
 // }
 
+>>>>>>> 021f73cd03ec45b6fa62c6ce4296dc823a46c1fa
 
 #ifdef CAPSTONE_HLS
 	for (i = 0; i < 28*28; i++) {
@@ -135,7 +145,7 @@ double probs[10];
 	}
 #endif
 
-	for (i = 0;i < 70;i++) {
+	for (i = 0;i < 40;i++) {
 		double sum = hiddenWeights[i][0];
 		for (int j = 1;j < 785;j++) {
 #pragma HLS UNROLL
@@ -151,11 +161,11 @@ double probs[10];
 	for (i = 0;i < 10;i++) {
 #pragma HLS UNROLL
 		double sum = outputWeights[i][0];
-		for (j = 1;j < 71;j++) {
+		for (j = 1;j < 41;j++) {
 #pragma HLS UNROLL
 			tmp[i] = outputWeights[i][j]*hidOut[j-1];
 		}
-		for (j = 1; j < 71; j++) {
+		for (j = 1; j < 41; j++) {
 			sum += tmp[i];
 		}
 		// activate
