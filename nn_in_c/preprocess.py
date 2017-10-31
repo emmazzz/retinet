@@ -64,7 +64,7 @@ def getOnePic(cap):
 
 WIDTH = 1920//2
 HIGHT = 1080//2
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
 cv2.resizeWindow('frame', WIDTH,HIGHT)
 
@@ -89,9 +89,11 @@ while t < 4:
     cropped = crop_image(thresh)
     result = recenter(cropped)
     resized_image = resize(result)
-    resized_image = resized_image
-    cv2.imwrite('testing%d.jpg'%t, resized_image)
-    byte_array = np.ndarray.flatten(resized_image)[::-1]
+    
+    byte_array = np.ndarray.flatten(resized_image)
+    byte_array = byte_array[::-1]
+
+    cv2.imwrite('testing%d.jpg'%t, np.reshape(byte_array, (28, 28)))
 
     # write to os
     result = " ".join(["%03d"%x for x in byte_array])

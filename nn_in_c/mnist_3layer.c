@@ -223,13 +223,24 @@ void trainNeuralNetwork(Network *nn, int numEpoch, int numTrain) {
 
 
 void testNeuralNetwork(Network *nn) {
+	FILE *inputs = fopen("inputs.txt","w");
+	FILE *labels = fopen("labels.txt","w");
 	load_mnist_init_test();
 	int num_correct = 0;
 	for (int j = 0;j < 2000; j ++) {
 		Vector *input = getNextImageTest();
-		
+
 		feedInput(nn,input);
 		int label = getNextLabelTest();
+		if (j < 30) {
+			fprintf(inputs, "{");
+			for (int i = 0;i < 783;i++) {
+				fprintf(inputs, "%0.5lf,",input->vals[i]);
+			}
+			fprintf(inputs, "%0.5lf}\n",input->vals[783]);
+
+			fprintf(labels, "%d\n", label);
+		}
 		forwardPropagate(nn);
 		int class = getClassification(nn);
 		//printf("label is %d classified as %d\n", label, class);
@@ -237,6 +248,8 @@ void testNeuralNetwork(Network *nn) {
 		//printNetwork(nn);
 	}
 	printf("accuracy %f\n", num_correct/2000.0);
+	fclose(inputs);
+	fclose(labels);
 	free_mnist_test();
 }
 
