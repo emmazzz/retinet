@@ -1,6 +1,6 @@
 #define CAPSTONE_HLS
 
-#include "inf.h"
+#include "inf.hpp"
 #include <stdio.h>
 //#include <cmath>
 #include <math.h>
