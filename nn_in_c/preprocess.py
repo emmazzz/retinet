@@ -64,27 +64,34 @@ def getOnePic(cap):
 
 WIDTH = 1920//2
 HIGHT = 1080//2
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
 cv2.resizeWindow('frame', WIDTH,HIGHT)
 
 t = 0
-while t < 9:
+while t < 4:
     # took picture named "capture.jpg"
-    # time.sleep(0.5) 
+    time.sleep(2) 
     ret, frame = cap.read()
     # cv2.imwrite('capturelala%d.jpg'%t, frame)
-
     # getOnePic(cap)
     
     # preprocess image
     # img = cv2.imread("capture.jpg", 0);
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # print(type(img))
+    # print(np.shape(img))
+    # print(img2)
+    
+
+
     ret,thresh = cv2.threshold(img,127,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C)
     cropped = crop_image(thresh)
     result = recenter(cropped)
     resized_image = resize(result)
-    byte_array = np.ndarray.flatten(resized_image)
+    resized_image = resized_image
+    cv2.imwrite('testing%d.jpg'%t, resized_image)
+    byte_array = np.ndarray.flatten(resized_image)[::-1]
 
     # write to os
     result = " ".join(["%03d"%x for x in byte_array])
@@ -101,7 +108,13 @@ while t < 9:
 
 
     # Create a black image
-    img = cv2.resize(frame, (WIDTH, HIGHT)) 
+    img = cv2.resize(img, (WIDTH, HIGHT))
+    # img = np.zeros((WIDTH,HIGHT), dtype=np.uint8)
+    # for row in range(WIDTH):
+    #     img[row] = img2[WIDTH - row- 1][::-1]
+
+    # print(img) 
+
 
     # Write some Text
 
@@ -110,6 +123,8 @@ while t < 9:
     fontScale              = 2
     fontColor              = (200,200,200)
     lineType               = 2
+
+
 
     cv2.putText(img,'Retinet sees a %s'%result, 
         bottomLeftCornerOfText, 
@@ -165,15 +180,15 @@ cv2.destroyAllWindows()
 # - brew install opencv
 
 
-# cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture(1)
 # i = 0
 # while(True):
 #     ret, frame = cap.read()
 #     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
 #     i+=1
 #     cv2.imshow('frame', rgb)
-#     if cv2.waitKey(1) & 0xFF == ord('t'):
-#         out = cv2.imwrite('capture%d.jpg'%(i), frame)
+#     # if cv2.waitKey(1) & 0xFF == ord('t'):
+#     #     out = cv2.imwrite('capture%d.jpg'%(i), frame)
 #     if cv2.waitKey(1) & 0xFF == ord('q'):
 #         break
 
