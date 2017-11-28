@@ -5,6 +5,7 @@ import os
 import serial
 import time
 import testLeNet
+import copy
 ###############################
 def crop_image(img,tol=1):
     # img is image data
@@ -65,6 +66,27 @@ def getOnePic(cap):
         if key & 0xFF == ord('q'):
             break
 
+def clip_on(img, img2):
+
+    h1 = len(img)
+    w1 = len(img[0])
+    h2 = len(img2)   
+    w2 = len(img2[0])
+
+
+    m = 4
+    img_c = np.zeros((h2*m, w2*m))
+    for r in range(h2*m):
+        for c in range(w2*m):
+            img_c[r][c] = img2[r//m][c//m]
+    h2 = h2*m
+    w2 = w2*m
+    res = copy.deepcopy(img)
+   
+
+    res[h1-h2:h1,w1-w2:w1] = img_c
+    return res
+
 
 WIDTH = 1920//2
 HEIGHT = 1080//2
@@ -75,11 +97,54 @@ cv2.resizeWindow('frame', WIDTH,HEIGHT)
 t = 0
 # sd = serial.Serial("/dev/tty.usbmodem1411",115200)
 # sd = serial.Serial("/dev/tty.SLAB_USBtoUART",115200)
+refreshTime = 1.0
+time_stamp = time.time()
 
+# Write some Text
+
+font                   = cv2.FONT_HERSHEY_SIMPLEX
+bottomLeftCornerOfText = (10,500)
+fontScale              = 1
+fontColor              = (50,50,50)
+lineType               = 2
+
+timetook = 0
+img_save = [[]]
+result = "nothing"
 while t < 300:
     # took picture named "capture.jpg"
+    
+    if (time.time() - time_stamp) < refreshTime:
+        # print("time", str(time.time() - time_stamp))
+        ret, frame = cap.read()
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        #Display the image
+        # Create a black image
+        img = cv2.resize(img, (WIDTH, HEIGHT))
+        img = np.flipud(np.fliplr(img))
+        img = np.array(img)
+
+        cv2.putText(img,'Retinet sees a %s at time %f'%(result, timetook), 
+        bottomLeftCornerOfText, 
+        font, 
+        fontScale,
+        fontColor,
+        lineType)
+        img = clip_on(img, img_save)
+        cv2.imshow("frame",img)
+        cv2.waitKey(1)
+        continue
+    print("Iteration: ", str(t))
+    time_stamp = time.time()
+    # means time to take another picture for analyzing:
+
+
+
+
+
+
     start = time.time()
-    time.sleep(1) 
+    # time.sleep(1) 
     ret, frame = cap.read()
     # cv2.imwrite('capturelala%d.jpg'%t, frame)
     # getOnePic(cap)
@@ -102,8 +167,9 @@ while t < 300:
     
     byte_array = np.ndarray.flatten(resized_image)
     byte_array = byte_array[::-1]
+    img_save = np.reshape(byte_array, (28, 28))
 
-    cv2.imwrite('testing%d.jpg'%(t%10), np.reshape(byte_array, (28, 28)))
+    cv2.imwrite('testing%d.jpg'%(t%10), img_save)
 
     # write to os
     # resultstr = " ".join(["%03d"%x for x in byte_array])+" "
@@ -137,17 +203,10 @@ while t < 300:
     img = np.array(img)
 
 
-    # Write some Text
-
-    font                   = cv2.FONT_HERSHEY_SIMPLEX
-    bottomLeftCornerOfText = (10,500)
-    fontScale              = 1
-    fontColor              = (50,50,50)
-    lineType               = 2
-
-
-
-    cv2.putText(img,'Retinet sees a %s at time %f'%(result, time.time()-start), 
+    
+    ret_result = result
+    timetook = time.time()-start
+    cv2.putText(img,'Retinet sees a %s at time %f'%(ret_result, timetook), 
         bottomLeftCornerOfText, 
         font, 
         fontScale,
@@ -155,10 +214,11 @@ while t < 300:
         lineType)
 
     #Display the image
+    img = clip_on(img, img_save)
     cv2.imshow("frame",img)
     cv2.waitKey(1)
 
-    print(t)
+    # print(t)
     print()
 
 

@@ -311,7 +311,6 @@ def conv_layer_forward(input, layer, param):
   output['batch_size'] = batch_size
   num = int(num)
   batch_size = int(batch_size)
-  print((h_out * w_out * num, batch_size))
   output['data'] = np.zeros((int(h_out * w_out * num), batch_size))
 
   input_n = {
@@ -838,7 +837,6 @@ def conv_net_predict(params, layers, data):
 
   i = l
   assert layers[i]['type'] == 'LOSS', 'last layer must be loss layer'
-  print("hallp")
   wb = np.vstack([params[i-1]['w'], params[i-1]['b']])
   return mlrloss_predict(wb,
                                             output[i-1]['data'],

@@ -106,8 +106,8 @@ def get_500result(xtest):
   # initialize parameters
   print("Initializing Parameters...")
   # params = pickle.load(open('lenet10000.mat', 'rb'))
-
-  with open('lenet10000.mat', 'rb') as file:
+  path = "/Users/bernieyang/Git/retinet/nn_in_c python only/lenet10000.mat"
+  with open(path, 'rb') as file:
     params = pickle.load(file, encoding='latin1')
   param_winc = copy.deepcopy(params)
 
@@ -124,7 +124,7 @@ def get_500result(xtest):
   layers[1]['batch_size'] = xtest.shape[1]
   # cptest, _ = cnn_lenet.conv_net(params, layers, xtest, ytest, False)
   result = cnn_lenet.conv_net_500(params, layers, xtest)
-  print(len(result))
+  # print(len(result))
   return result
   
 
