@@ -70,6 +70,64 @@ def get_lenet():
   layers[8]['num'] = 10
   return layers
 
+def get_500result(xtest):
+  # define lenet
+  layers = get_lenet()
+
+  # load data
+  # change the following value to true to load the entire dataset
+  # fullset = False
+  # print("Loading MNIST Dataset...")
+  # xtrain, ytrain, xval, yval, xtest, ytest = cnn_lenet.load_mnist(fullset)
+  # print("MNIST Dataset Loading Complete!\n")
+
+  # xtrain = np.hstack([xtrain, xval])
+  # ytrain = np.hstack([ytrain, yval])
+  # m_train = xtrain.shape[1]
+  # xtest = xtest[:]
+  # ytest = 
+
+
+  # cnn parameters
+  batch_size = 64
+  mu = 0.9
+  epsilon = 0.01
+  gamma = 0.0001
+  power = 0.75
+  weight_decay = 0.0005
+  w_lr = 1
+  b_lr = 2
+
+  # test_interval = 100
+  # display_interval = 100
+  # snapshot = 5000
+  # max_iter = 10000
+
+  # initialize parameters
+  print("Initializing Parameters...")
+  # params = pickle.load(open('lenet10000.mat', 'rb'))
+
+  with open('lenet10000.mat', 'rb') as file:
+    params = pickle.load(file, encoding='latin1')
+  param_winc = copy.deepcopy(params)
+
+  for l_idx in range(1, len(layers)):
+    param_winc[l_idx]['w'] = np.zeros(param_winc[l_idx]['w'].shape)
+    param_winc[l_idx]['b'] = np.zeros(param_winc[l_idx]['b'].shape)
+  # learning iterations
+  # random.seed(100000)
+  # indices = range(m_train)
+  # random.shuffle(indices)
+
+  # print("Training Started. Printing report on training data every " + str(display_interval) + " steps.")
+  # print("Printing report on test data every " + str(test_interval) + " steps.\n")
+  layers[1]['batch_size'] = xtest.shape[1]
+  # cptest, _ = cnn_lenet.conv_net(params, layers, xtest, ytest, False)
+  result = cnn_lenet.conv_net_500(params, layers, xtest)
+  print(len(result))
+  return result
+  
+
 
 def get_result(xtest):
   # define lenet

@@ -68,7 +68,7 @@ def getOnePic(cap):
 
 WIDTH = 1920//2
 HEIGHT = 1080//2
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
 cv2.resizeWindow('frame', WIDTH,HEIGHT)
 
@@ -85,7 +85,7 @@ while t < 300:
     # getOnePic(cap)
     
     # preprocess image
-    # img = cv2.imread("capture.jpg", 0);
+    # img = cv2.imread("capture1.jpg", 0);
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # print(type(img))
     # print(np.shape(img))
@@ -108,10 +108,27 @@ while t < 300:
     # write to os
     # resultstr = " ".join(["%03d"%x for x in byte_array])+" "
     
-    result = testLeNet.get_result(np.reshape(byte_array, (28*28, 1)))
+    # result = testLeNet.get_result(np.reshape(byte_array, (28*28, 1)))
+
+    result = testLeNet.get_500result(np.reshape(byte_array, (28*28, 1)))
+    result = [ int(x[0]*10000) for x in result]
+    resultstr = ",".join(["%08d"%x for x in result])+","
+    
+    ########################################################################
+
+    file_handler = open("somenumbers.txt", "w")
+    file_handler.write(resultstr)
+    file_handler.close()
+    os.system('gcc lenet_inf.c')
+    os.system('./a.out')
+    file_handler2 = open("result.txt", "r")
+    result = file_handler2.read()
+    # print("final out put is :", result)
 
 
 
+    # print(resultstr)
+    ########################################################################
     # Create a black image
     img = cv2.resize(img, (WIDTH, HEIGHT))
    

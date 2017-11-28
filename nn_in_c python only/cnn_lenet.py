@@ -727,6 +727,63 @@ def sgd_momentum(w_rate, b_rate, mu, decay, params, param_winc, param_grad):
   assert len(param_winc_) == len(param_grad), 'param_winc_ does not have the right length (error at sgd momentum)'
   return params_, param_winc_
 
+def conv_net_500(params, layers, data):
+  """
+
+  Args:
+    params: a dictionary that stores hyper parameters
+    layers: a dictionary that defines LeNet
+    data: input data with shape (784, batch size)
+    labels: label with shape (batch size,)
+    doBackProp: enables backprop when set to True
+
+  Returns:
+    cp: cost
+    param_grad: gradients w.r.t all parameters across all layers
+  
+  Defines the CNN. It takes the configuration of the
+  network structure (defined in layers), the parameters of each layer
+  (param), the input data (data) and label (labels) and
+  does feed forward and backward propagation, returns the cost (cp) and
+  gradient w.r.t all the parameters (param_grad).
+  
+  ########################## IMPORTANT ###################################
+  WHEN THIS FUNCTION IS CALLED WITH ONLY ONE OUTPUT ARGUMENT, 
+  IT PERFORMS ONLY FORWARD PROPAGATION
+  WHEN IT IS CALLED WITH TWO OR MORE OUTPUT ARGUMENTS, 
+  IT PERFORMS BOTH FORWARD AND BACKWARD PROPAGATION
+  """
+  l = len(layers)
+  batch_size = layers[1]['batch_size']
+  assert layers[1]['type'] == 'DATA', 'first layer must be data layer'
+
+  param_grad = {}
+  cp = {}
+  output = {}
+  output[1] = {}
+  output[1]['data'] = data
+  output[1]['height'] = layers[1]['height']
+  output[1]['width'] = layers[1]['width']
+  output[1]['channel'] = layers[1]['channel']
+  output[1]['batch_size'] = layers[1]['batch_size']
+  output[1]['diff'] = 0
+
+  for i in range(2, l):
+    if layers[i]['type'] == 'CONV':
+      output[i] = conv_layer_forward(output[i-1], layers[i], params[i-1])
+    elif layers[i]['type'] == 'POOLING':
+      output[i] = pooling_layer_forward(output[i-1], layers[i])
+    elif layers[i]['type'] == 'IP':
+      output[i] = inner_product_forward(output[i-1], layers[i], params[i-1])
+    elif layers[i]['type'] == 'RELU':
+      output[i] = relu_forward(output[i-1], layers[i])
+
+  i = l
+  assert layers[i]['type'] == 'LOSS', 'last layer must be loss layer'
+  # print("hallp")
+  wb = np.vstack([params[i-1]['w'], params[i-1]['b']])
+  return output[i-1]['data']
+
 
 def conv_net_predict(params, layers, data):
   """
