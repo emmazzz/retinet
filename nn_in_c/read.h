@@ -1,3 +1,4 @@
+// # Author Bernie Yang, modified from 10601 sample code
 #ifndef _READ_H
 #define _READ_H
 

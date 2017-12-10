@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import math
-# import scipy.io
 import copy
 
 def load_mnist(fullset=True):
@@ -842,16 +841,6 @@ def conv_net_predict(params, layers, data):
                                             output[i-1]['data'],
                                             layers[i]['num'], 1)
 
-  # param_grad[i-1] = {}
-  # param_grad[i-1]['w'] = grad[0:-1, :]
-  # param_grad[i-1]['b'] = grad[-1, :]
-  # param_grad[i-1]['w'] = param_grad[i-1]['w'] / batch_size
-  # param_grad[i-1]['b'] = param_grad[i-1]['b'] / batch_size
-
-  # cp['cost'] = cost/batch_size
-  # cp['percent'] = percent
-
-  # return cp, param_grad
 
 
 
@@ -900,25 +889,4 @@ def mlrloss_predict(wb, X, K, prediction):
   # if prediction == 1:
   indices = np.argmax(prob, axis=0)
   return indices
-    
-  #   print(indices[1:100])
-  #   print(y[1:100])
-
-  #   percent = len(np.where(y == indices)[0]) / float(len(y))
-  # else:
-  #   percent = 0
-
-  # # compute gradients
-  # od = prob - I
-  # gw = od.dot(X.T)
-  # gw = gw[0:-1, :].T
-  # gb = np.sum(od, axis=1)
-  # gb = gb[0:-1]
-  # # print gw.shape, gb.shape
-  # g = np.vstack([gw, gb])
-
-  # od = theta.dot(od[0:-1, :])
-
-  # return nll, g, od, percent
-
-
+   

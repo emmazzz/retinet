@@ -1,3 +1,5 @@
+# Author Bernie Yang, modified from 10601 sample code
+
 import numpy as np
 import os
 import math

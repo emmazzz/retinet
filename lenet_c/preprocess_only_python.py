@@ -1,3 +1,5 @@
+# @author Bernie Yang
+
 import cv2
 import numpy as np
 import math
@@ -218,19 +220,7 @@ while t < 300:
     cv2.imshow("frame",img)
     cv2.waitKey(1)
 
-    # print(t)
     print()
-
-
-
-    # with open("processed.txt", 'w') as output:
-    #     output.write(result)
-    # tmp = os.system("python2 sendToUart.py")
-
-    # # print("hello")
-    # with open("label.txt", "r") as f:
-    #     result = f.read()
-    #     print(result)
 
     t+=1
 

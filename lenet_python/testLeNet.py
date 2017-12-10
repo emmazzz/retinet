@@ -1,7 +1,4 @@
-#######################################################################################
-#######       DO NOT MODIFY, DEFINITELY READ THROUGH ALL OF THE CODE            #######
-#######################################################################################
-
+# Author Bernie Yang, modified from 10601 sample code
 import numpy as np
 import cnn_lenet
 import pickle

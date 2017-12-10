@@ -1,3 +1,4 @@
+# Author Bernie Yang, modified from 10601 sample code
 import cv2
 import numpy as np
 import math
